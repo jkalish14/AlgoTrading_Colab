@@ -1,4 +1,4 @@
-from database import DataBase
+from database import DataBase, Stock_Table_Data
 import config
 
 import alpaca_trade_api as tradeapi
@@ -13,24 +13,21 @@ api = tradeapi.REST(api_settings["KEY"], alpaca_api["Secret_Key"], api_settings[
 api._use_raw_data = True
 all_symbols = api.list_assets(status = "active")
 
-# Built the SQL  Request
-sql_cmd = '''
-INSERT INTO stocks (symbol, name, exchange)
-    VALUES %s
-    ON CONFLICT (symbol) DO NOTHING
-'''
-sql_vals = []
+# Build the stock ticker data
+headers = Stock_Table_Data.headers
+ticker_data = {} 
+i = 0
 for obj in all_symbols:
     if obj['tradable'] == True:
-        value = (f"{obj['symbol'].encode('utf-8').decode('ascii', 'ignore')}",
-                 f"{obj['name'].encode('utf-8').decode('ascii', 'ignore')}", 
-                 f"{obj['exchange']}")
-        sql_vals.append(value)
+        ticker_data[i]= {headers[1]: obj['symbol'], headers[2] : obj['name'], headers[3] : obj['exchange']}
+        i += 1
+
+stock_tickers = Stock_Table_Data(ticker_data)
 
 
 # Create the DB Object and write to it
 db = DataBase(config.DB_ACCESS[config.DB_LOCATION])
-db.execute_values(sql_cmd, sql_vals)
+db.write_data(stock_tickers)
 db.close_cursor()
 db.commit()
 db.close_connection()
