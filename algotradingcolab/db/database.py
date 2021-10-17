@@ -1,14 +1,14 @@
 from psycopg2.extras import execute_batch, execute_values
 import psycopg2
 import psycopg2.extensions
-from dataclasses import dataclass, field
 
-@dataclass
 class DB_Data():
-    _sql_write_cmd : str       = ""
-    _table         : str       = ""
-    _headers       : list = field(default_factory=list)
-    _data          : dict = field(default_factory=dict)
+
+    def __init__(self):
+        self._sql_write_cmd : str  = ""
+        self._table         : str  = ""
+        self._headers       : list = []
+        self._data          : dict = {}
 
     def to_sql_vals(self):
         pass
@@ -71,8 +71,6 @@ class DataBase():
         self._curser = self._connection.cursor()
         self._initialized = True
 
-        print("Object Created")
-
     @staticmethod
     def get_allowable_keys(table_name : str) -> list[str]:
         if table_name == "stocks":
@@ -110,8 +108,25 @@ class DataBase():
     def write_data(self,  data : DB_Data):
         return self.execute_values(data.sql_write_cmd, data.to_sql_vals())
 
-    def read_data(self, sql_cmd, data : DB_Data):
-        pass  
+    def read_data(self, sql_cmd, fetch_params : tuple[callable, dict], table_data_class : DB_Data):
+        
+        if table_data_class is Stock_Table_Data:
+            resp = self.execute(sql_cmd)
+
+            # Does the function require an argument?
+            if fetch_params[1] is None:
+                resp = fetch_params[0]()
+            else:
+                resp = fetch_params[0](**fetch_params[1])
+
+            # If the response is a tuple, turn it to a list
+            if type(resp) is tuple:
+                resp = [resp]
+
+            obj = Stock_Table_Data.init_fromDB(resp)
+
+        return obj
+
 
 
 class Stock_Table_Data(DB_Data):
@@ -119,11 +134,13 @@ class Stock_Table_Data(DB_Data):
     table : str = "stocks"
     headers : list = DataBase.get_allowable_keys(table)
     
-    def __init__(self, stock_info : dict):
+    def __init__(self):
         super().__init__()
 
-        # self.headers = DataBase.get_allowable_keys(self.table)
-        self.sql_write_cmd = '''
+    @staticmethod
+    def init(stock_info : dict):
+        obj = Stock_Table_Data()
+        obj.sql_write_cmd = '''
                                 INSERT INTO stocks (symbol, name, exchange)
                                 VALUES %s
                                 ON CONFLICT (symbol) DO NOTHING
@@ -142,8 +159,10 @@ class Stock_Table_Data(DB_Data):
                 print(error_string)
                 raise KeyError(f"Invalid Key: {key}")
 
-        self.data = stock_info
-
+        obj.data = stock_info
+        
+        return obj
+    
     @staticmethod
     def init_fromDB(response : list[tuple]):
         headers =  Stock_Table_Data.headers
@@ -152,7 +171,7 @@ class Stock_Table_Data(DB_Data):
             value = {headers[i] : row[i] for i in range(1,len(headers))}
             data[row[0]] = value
         
-        return Stock_Table_Data(data)
+        return Stock_Table_Data.init(data)
     
     # Overwrites the base classes function
     def to_sql_vals(self) -> str:

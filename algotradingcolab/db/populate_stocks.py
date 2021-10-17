@@ -22,7 +22,7 @@ for obj in all_symbols:
         ticker_data[i]= {headers[1]: obj['symbol'], headers[2] : obj['name'], headers[3] : obj['exchange']}
         i += 1
 
-stock_tickers = Stock_Table_Data(ticker_data)
+stock_tickers = Stock_Table_Data().init(ticker_data)
 
 
 # Create the DB Object and write to it

@@ -1,7 +1,7 @@
 
 from context import algotradingcolab
 from algotradingcolab.db import config
-from algotradingcolab.db.database import DataBase
+from algotradingcolab.db.database import DataBase, Stock_Table_Data
 
 import os
 
@@ -16,9 +16,8 @@ assert(db.initialized == True)
 print("Databases are accessable!")
 
 # Check to see if the stocks table contains the data we think it should
-resp = db.execute("SELECT * from stocks")
-records = db.cursor.fetchmany(10)
-assert(records[0] == (1, 'AAMC', 'Altisource Asset Mgmt Corp', 'AMEX'))
+st = db.read_data("SELECT * from stocks", (db.cursor.fetchmany, {"size" : 10}), Stock_Table_Data)
+assert(st.data[1] == {'symbol': 'AAMC', 'name': 'Altisource Asset Mgmt Corp', 'exchange': 'AMEX'})
 
 
 print(f"{os.path.splitext(os.path.basename(__file__))[0]} Passed!")
