@@ -24,4 +24,4 @@ print(st)
 assert(st.data[1] == {'symbol': 'AAMC', 'name': 'Altisource Asset Mgmt Corp', 'exchange': 'AMEX'})
 
 test = db.read_data("SELECT * from stocks", (db.cursor.fetchall, None), Stock_Table_Data)
-print(test)
+print("Modifying the variables to see if pychace changes")
