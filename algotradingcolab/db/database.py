@@ -1,18 +1,22 @@
 from psycopg2.extras import execute_batch, execute_values
 import psycopg2
 import psycopg2.extensions
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-# @dataclass
+@dataclass
 class DB_Data():
-
-    def __init__(self):
-        self._sql_write_cmd : str       = ""
-        self._table         : str       = ""
-        self._headers       : list[str] = []
+    _sql_write_cmd : str       = ""
+    _table         : str       = ""
+    _headers       : list = field(default_factory=list)
+    _data          : dict = field(default_factory=dict)
 
     def to_sql_vals(self):
         pass
+
+    def __repr__(self):
+        string = (f"{self.__class__.__name__}"
+                  f"(table = {self.table}, headers = {self.headers}, data_length = {len(self.data)})")
+        return string
 
     @property
     def headers(self):
@@ -38,6 +42,13 @@ class DB_Data():
     def table(self, val):
         self._table = val
     
+    @property
+    def data(self) -> dict:
+        return self._data
+    
+    @data.setter
+    def data(self, vals : dict) -> None:
+        self._data = vals
 
 class DataBase():
     
@@ -103,11 +114,10 @@ class DataBase():
         pass  
 
 
-
 class Stock_Table_Data(DB_Data):
     
-    table = "stocks"
-    headers = DataBase.get_allowable_keys(table)
+    table : str = "stocks"
+    headers : list = DataBase.get_allowable_keys(table)
     
     def __init__(self, stock_info : dict):
         super().__init__()
@@ -132,11 +142,7 @@ class Stock_Table_Data(DB_Data):
                 print(error_string)
                 raise KeyError(f"Invalid Key: {key}")
 
-        self._data = stock_info
-    
-    @property
-    def data(self) -> dict:
-        return self._data
+        self.data = stock_info
 
     @staticmethod
     def init_fromDB(response : list[tuple]):

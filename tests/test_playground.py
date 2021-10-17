@@ -19,6 +19,6 @@ resp = db.execute("SELECT * from stocks")
 records = db.cursor.fetchmany(10)
 
 st = Stock_Table_Data.init_fromDB(records)
-# print(st.data[1])
+print(st)
 
 assert(st.data[1] == {'symbol': 'AAMC', 'name': 'Altisource Asset Mgmt Corp', 'exchange': 'AMEX'})
