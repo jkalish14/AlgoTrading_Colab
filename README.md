@@ -14,7 +14,7 @@ Then point VSCode to the python instance located at C:/Users/USER_NAME/.venv/ENV
 if you are using code-runner add the following into your workspace .code-workspace "settings" 
 ```
     "code-runner.executorMap": {
-        "python": "C:/Users/USER_NAME/.venv/ENV_NAME/Scripts/python.exe -u"
+        "python": "$pythonPath -u $fullFileName"
     }
 ```
 
@@ -23,32 +23,23 @@ Note, the virtual environment and the files for the project do not need to be in
 virtual env: C:/Users/USER_NAME/.venv/AlgoTrading/
 program files: D:/git/AlgoTrading/
 ```
+# Setting up a Docker Image for local Data Base
+Take a read through the following: 
+* [TimeScaleDB's Guide](https://docs.timescale.com/timescaledb/latest/how-to-guides/install-timescaledb/self-hosted/docker/installation-docker/#docker) on setting up a database through docker
+* [Tech Expert's Guide](https://techexpert.tips/timescaledb/timescaledb-docker-installation/) to see how to make data persistent
+* [Part Time Larry's YouTube Guide](https://youtu.be/4dwCjaX4QUE?t=604) walks you through installing and testing out the TimescaleDB
 
 # Install dependencies
+
+first, ensure your virtual environment is active
 ```
 $ C:/Users/USER_NAME/.venv/ENV_NAME/Scripts/Activate
-$ pip install -r requirements.txt
+```
+Then install the requirements
+```
+(ENV_NAME) $ pip install -r requirements.txt
 ```
 
 # Creating the API Keys file
 
-Create a file called "apikeys.json" in the root directory and fill it with the following information. YOUR_PAPER_PUBLIC_KEY, YOUR_LIVE_PUBLIC_KEY, and YOUR_PRIVATE_KEY can be found from your alpaca dashboard
-```
-{
-    "Services": {
-        "Supported" : ["Alpaca"],
-        "Alpaca" : {
-            "Paper_Trading" : {
-                "End_Point" : "https://paper-api.alpaca.markets",
-                "API_Public_Key"   : "YOUR_PAPER_PUBLIC_KEY"
-            },
-            "Live_Trading" : {
-                "End_Point" : "https://api.alpaca.markets",
-                "API_Public_Key"   : "YOUR_LIVE_PUBLIC_KEY"
-            },
-            "API_Secret_Key"   : "YOUR_PRIVATE_KEY"
-
-        }
-    }
-}
-```
+rename the config_template.py file (located in /algotradingcolab/db) to config.py and populate the relevant fields
