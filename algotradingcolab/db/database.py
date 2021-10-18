@@ -57,5 +57,5 @@ class DataBase():
     def execute(self, command_str : str):
         return self.cursor.execute(command_str)
 
-    def execute_values(self, sql_cmd : str, vals : tuple):
+    def execute_values(self, sql_cmd : str, vals : list[tuple]):
         return execute_values(self.cursor, sql_cmd, vals)

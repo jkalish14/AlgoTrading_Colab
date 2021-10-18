@@ -16,6 +16,16 @@ command_list = [
         )''',
 
         '''
+            CREATE TABLE IF NOT EXISTS trading_days (
+            date            DATE            PRIMARY KEY     ,
+            market_open     BOOLEAN         NOT NULL        ,
+            close_time      TIME                            ,
+            open_time       TIME                            ,
+            session_close   TIME                            ,
+            session_open    TIME    
+        )''',
+
+        '''
         CREATE TABLE IF NOT EXISTS quotes_minutes (
             stock_id        INTEGER                         NOT NULL,
             date_time       TIMESTAMP WITHOUT TIME ZONE     NOT NULL,
