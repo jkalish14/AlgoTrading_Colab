@@ -11,18 +11,25 @@ class DataBase():
 
     def __init__(self, access_settings : dict):
         
-        if access_settings["CONNECTION"] is not None:
-            self._connection = psycopg2.connect(access_settings["CONNECTION"])
-            
-        else:
-            self._connection =    psycopg2.connect(host     = access_settings["DB_HOST"],
-                                                   database = access_settings["DB_NAME"],
-                                                   user     = access_settings["DB_USER"],
-                                                   password = access_settings["DB_PASSWORD"],
-                                                   port     = access_settings["DB_PORT"])
+        try: 
+            if access_settings["CONNECTION"] is not None:
+                self.connection = psycopg2.connect(access_settings["CONNECTION"])
+                
+            else:
 
-        self._curser = self._connection.cursor()
-        self._initialized = True
+                self.connection =    psycopg2.connect(host     = access_settings["DB_HOST"],
+                                                    database = access_settings["DB_NAME"],
+                                                    user     = access_settings["DB_USER"],
+                                                    password = access_settings["DB_PASSWORD"],
+                                                    port     = access_settings["DB_PORT"])
+
+            self.cursor = self._connection.cursor()
+            self.initialized = True
+
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+            self.initialized = False
+
 
     @staticmethod
     def get_allowable_keys(table_name : str) -> list[str]:
@@ -36,14 +43,32 @@ class DataBase():
     @property
     def initialized(self) -> bool:
         return self._initialized
+    
+    @initialized.setter
+    def initialized(self, val):
+        self._initialized = val
 
     @property
     def connection(self) -> psycopg2.extensions.connection:
         return self._connection
 
+    @connection.setter
+    def connection(self, con : psycopg2.extensions.connection):
+        if type(con) is not psycopg2.extensions.connection:
+            raise ValueError
+    
+        self._connection = con
+
     @property
     def cursor(self) -> psycopg2.extensions.cursor:
         return self._curser
+
+    @cursor.setter
+    def cursor(self, val : psycopg2.extensions.cursor):
+        if type(val) is not psycopg2.extensions.cursor:
+            raise ValueError
+
+        self._curser = val
 
     def commit(self) -> None:
         self.connection.commit()

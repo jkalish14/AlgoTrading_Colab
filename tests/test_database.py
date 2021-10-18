@@ -1,35 +1,47 @@
 
-from context import algotradingcolab
+# from context import algotradingcolab
+
+
 from algotradingcolab.db import config
 from algotradingcolab.db.database import DataBase
 from algotradingcolab.helpers.decorators import time_func_execution
+from datetime import date, time
 
 import os
 
+
 @time_func_execution
-def get_all_stocks(database):
+def get_all_stocks(db : DataBase):
     db.execute("SELECT * from stocks")
-    rv = db._curser.fetchall()
+    rv = db.cursor.fetchall()
     return rv
 
-# Test connection to remote db
-db = DataBase(config.DB_ACCESS["Remote"])
-assert(db.initialized == True)
-print("Remote DB is accessable")
+def connect_to_database(location : str):
+    return DataBase(config.DB_ACCESS[location])
 
-# Create the local db Object
-db =DataBase(config.DB_ACCESS["Local"])
-assert(db.initialized == True)
-print("Local DB is accessable")
+def test_connect_to_local_database():
+    local_db = connect_to_database("Local")
+    assert(local_db.initialized == True)
+    local_db.close_connection()
 
-# Check to see if the stocks table contains the data we think it should
-db.execute("SELECT * from stocks")
-rv = db._curser.fetchmany(10)
-assert(rv[0] == (1, 'AAMC', 'Altisource Asset Mgmt Corp', 'AMEX', 'us_equity', True, False))
+def test_connect_to_remote_database():
+    remote_db = connect_to_database("Remote")
+    assert(remote_db.initialized == True)
+    remote_db.close_connection()
 
-get_all_stocks(db)
-print(f"{os.path.splitext(os.path.basename(__file__))[0]} Passed!")
+def test_local_stocks_table():
+    db = connect_to_database("Local")
+    db.execute("SELECT * from stocks")
+    rv = db.cursor.fetchmany(10)
+    assert(rv[0] == (1, 'AAMC', 'Altisource Asset Mgmt Corp', 'AMEX', 'us_equity', True, False))
+
+def test_local_dates_table():
+    db = connect_to_database("Local")
+    db.execute("SELECT * from trading_days")
+    rv = db.cursor.fetchmany(10)
+    assert(rv[0] == (date(1970, 1, 2), True, time(16, 0), time(9, 30), time(19, 0), time(7, 0)))
 
 
+# test_local_dates_table()
 
 
