@@ -54,7 +54,8 @@ class DataBase():
     
     # These are static variables that are currently hard-coded, but 
     # eventually we should set these via a request to the DB
-    _stocks_table_headers = ["id", "symbol", "name", "exchange"]
+    _stocks_table_headers = ["id", "symbol", "name", "exchange", "shortable", "fractionable", "class"]
+    _price_minute_table_headers = ["stock_id", "date_time", "open", "high", "low","close", "volume"]
 
     def __init__(self, access_settings : dict):
         
@@ -75,7 +76,9 @@ class DataBase():
     def get_allowable_keys(table_name : str) -> list[str]:
         if table_name == "stocks":
             returnValue = DataBase._stocks_table_headers
-        
+        elif table_name == "price_minute":
+            returnValue = DataBase._price_minute_table_headers
+
         return returnValue
 
     @property
@@ -110,7 +113,13 @@ class DataBase():
 
     def read_data(self, sql_cmd, fetch_params : tuple[callable, dict], table_data_class : DB_Data):
         
+        # Check to make sure the sql command is requesting data from the same table
+        # that the provided DB_Data class supports
+        if Stock_Table_Data.table not in sql_cmd:
+            raise psycopg2.DatabaseError("sql comamnd and provided DB_Data class do not match")
+
         if table_data_class is Stock_Table_Data:
+
             resp = self.execute(sql_cmd)
 
             # Does the function require an argument?
@@ -140,8 +149,8 @@ class Stock_Table_Data(DB_Data):
     @staticmethod
     def init(stock_info : dict):
         obj = Stock_Table_Data()
-        obj.sql_write_cmd = '''
-                                INSERT INTO stocks (symbol, name, exchange)
+        obj.sql_write_cmd = f'''
+                                INSERT INTO stocks (symbol, name, exchange, shortable, fractionable, class)
                                 VALUES %s
                                 ON CONFLICT (symbol) DO NOTHING
                                '''
@@ -179,7 +188,66 @@ class Stock_Table_Data(DB_Data):
         headers = Stock_Table_Data.headers[1:]
         sql_vals = []
         for id in self.data.keys():
-            value = tuple([f"{self.data[id][header].encode('utf-8').decode('ascii', 'ignore')}" for header in headers])
+            value = {header : self.data[id][header] for header in headers}
+
+            # Format each column as needed
+            value["shortable"] = str(value["shortable"]).lower()
+            value["fractionable"] = str(value["fractionable"]).lower()
+
+            sql_vals.append(tuple(value.values()))
+        return sql_vals
+
+class Price_Table_Data(DB_Data):
+    
+    table : str = "price_minute"
+    headers : list = DataBase.get_allowable_keys(table)
+    
+    def __init__(self):
+        super().__init__()
+
+    @staticmethod
+    def init(input_data : dict):
+        obj = Price_Table_Data()
+        obj.sql_write_cmd = f"""INSERT INTO price_minute
+                             (stock_id, date_time, open, high, low, close, volume)
+                             VALUES %s 
+                             ON CONFLICT (stock_id, date_time) DO NOTHING
+                             """
+
+        # Check to make sure the keys match the table column headings
+        for key in input_data[list(input_data.keys())[0]].keys():
+
+            if key not in Price_Table_Data.headers:
+
+                valid_headers_str = ""
+                for val in Price_Table_Data.headers:
+                    valid_headers_str += f'\t - {val} \n'
+
+                error_string = f'''KeyError: \"{key}\" key in provided dictionary does not match a DB column. DB Columns are: \n {valid_headers_str}'''
+                print(error_string)
+                raise KeyError(f"Invalid Key: {key}")
+
+        obj.data = input_data
+        
+        return obj
+    
+    @staticmethod
+    def init_fromDB(response : list[tuple]):
+        headers =  Price_Table_Data.headers
+        data = {}
+        for row in response:
+            value = {headers[i] : row[i] for i in range(1,len(headers))}
+            data[row[0]] = value
+        
+        return Price_Table_Data.init(data)
+    
+    # Overwrites the base classes function
+    def to_sql_vals(self) -> str:
+
+        headers = Price_Table_Data.headers[2:]
+        sql_vals = []
+        for (id, time_stamp) in self.data.keys():
+            value = tuple([id, time_stamp]+[self.data[(id, time_stamp)][header] for header in headers])
             sql_vals.append(value)
         return sql_vals
 

@@ -6,10 +6,13 @@ db = DataBase(config.DB_ACCESS[config.DB_LOCATION])
 
 command_list = [    
         ''' CREATE TABLE IF NOT EXISTS stocks (
-            id          SERIAL                  PRIMARY KEY     , 
-            symbol      TEXT                    NOT NULL UNIQUE , 
-            name        TEXT                    NOT NULL        ,
-            exchange    TEXT                    NOT NULL
+            id              SERIAL                  PRIMARY KEY     , 
+            symbol          TEXT                    NOT NULL UNIQUE , 
+            name            TEXT                    NOT NULL        ,
+            exchange        TEXT                    NOT NULL        ,
+            class           TEXT                    NOT NULL        ,
+            shortable       BOOLEAN                 NOT NULL        ,
+            fractionable    BOOLEAN                 NOT NULL        
         )''',
 
         '''
