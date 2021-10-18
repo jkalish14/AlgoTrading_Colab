@@ -6,7 +6,7 @@ def time_func_execution(func):
         start_point = timer()
         __return_value = func(*args, **kwargs)
         end_point = timer()
-        print(func.__name__ +': '+ str(end_point - start_point))
+        print(f"{func.__name__} took {end_point - start_point} seconds to run")
         return __return_value
 
     return wrapper
