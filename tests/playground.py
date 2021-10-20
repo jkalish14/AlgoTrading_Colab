@@ -3,8 +3,11 @@ from context import algotradingcolab
 from algotradingcolab.db.database import DataBase
 from algotradingcolab.db import config
 
-a = DataBase(config.DB_ACCESS["Local"])
+import talib
 
+import pandas as pd
 
-a.execute("DELETE FROM price_minute")
-a.commit()
+db = DataBase(config.DB_ACCESS["Local"])
+
+db.drop_tables("DROP TABLE price_minute")
+db.commit()

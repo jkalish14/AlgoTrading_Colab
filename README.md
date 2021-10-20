@@ -31,14 +31,33 @@ Take a read through the following:
 
 # Install dependencies
 
+## Activate your virtual environment
 first, ensure your virtual environment is active
 ```
 $ C:/Users/USER_NAME/.venv/ENV_NAME/Scripts/Activate
 ```
-Then install the requirements
+## Install TA-lib
+ TA-lib, short for Technical Analysis Library is a C library that has a python wrapper. In order for it to work, the binary files need to be installed. Vist the ["Unofficial Windows Binaries for Python Extension Packages"](https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib) and download the relevant .whl package.
+
+ To locate the correct package to install, determine your system's architecture (it is probably 64 bit) and your version of python
+
+ ```bash
+ (ENV_NAME) $ python --version   # Prints your current python version (Make sure you are in the virtual env)
+ ```
+ 
+ If you are using python version 3.9 on a 64-bit machine, you want TA_Lib‑0.4.21‑cp39‑cp39‑win_amd64.whl. If your version of python is not 3.9, then select the appropriate .whl file to download. 
+
+ Ensuring your virtual environment is active, install the .whl file according to [The Pip documentation](TA_Lib‑0.4.21‑cp39‑cp39‑win_amd64.whl). The following worked for me. Your .whl file name may be different
+
+ ```bash
+(ENV_NAME) $ py -m pip install TA_Lib‑0.4.21‑cp39‑cp39‑win_amd64.whl
+ ```
+
+## Install from requirements file
 ```
 (ENV_NAME) $ pip install -r requirements.txt
 ```
+ 
 
 # Creating the API Keys file
 
