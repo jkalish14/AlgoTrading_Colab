@@ -47,7 +47,7 @@ $ C:/Users/USER_NAME/.venv/ENV_NAME/Scripts/Activate
  
  If you are using python version 3.9 on a 64-bit machine, you want TA_Lib‑0.4.21‑cp39‑cp39‑win_amd64.whl. If your version of python is not 3.9, then select the appropriate .whl file to download. 
 
- Ensuring your virtual environment is active, install the .whl file according to [The Pip documentation](TA_Lib‑0.4.21‑cp39‑cp39‑win_amd64.whl). The following worked for me. Your .whl file name may be different
+ Ensuring your virtual environment is active, install the .whl file according to [The Pip documentation](https://pip.pypa.io/en/latest/user_guide/#installing-from-wheels). The following worked for me. Your .whl file name may be different
 
  ```bash
 (ENV_NAME) $ py -m pip install TA_Lib‑0.4.21‑cp39‑cp39‑win_amd64.whl
