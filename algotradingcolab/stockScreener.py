@@ -16,13 +16,12 @@ from dash import html
 from dash.dependencies import Input, Output
 
 # Our Libraries
-from db import config
+import config
 from db.database import DataBase
 
 
 ## Initialize the DB
 db = DataBase(config.DB_ACCESS[config.DB_LOCATION])
-
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)

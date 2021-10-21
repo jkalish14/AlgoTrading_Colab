@@ -2,6 +2,7 @@ from psycopg2.extras import execute_batch, execute_values
 import psycopg2
 import psycopg2.extensions
 
+
 class DataBase():
 
     def __init__(self, access_settings : dict):
@@ -56,8 +57,8 @@ class DataBase():
         self.commit()
         self.populate_tables_dict()
 
-    def drop_tables(self, sql_cmd : str):
-        self.execute(sql_cmd)
+    def drop_tables(self, table_name : str):
+        self.execute(f"DROP TABLE {table_name}")
         self.commit()
         self.populate_tables_dict()
 

@@ -1,39 +1,37 @@
 
 # from context import algotradingcolab
-from algotradingcolab.db import config
+
 from algotradingcolab.db.database import DataBase
 from algotradingcolab.helpers.decorators import time_func_execution
 from datetime import date, time
 
-import pytest
-
-import os
+from algotradingcolab.database_management import populate_stocks_table, initialize_database
 
 TEST_TABLE_NAME = "test_cases_123"
 # DATABASE_LOCATIONS = ["Local", "Remote"]
 
-@time_func_execution
-def get_all_stocks(db : DataBase):
-    db.execute("SELECT * from stocks")
-    rv = db.cursor.fetchall()
-    return rv
-
-def connect_to_database(location : str):
-    return DataBase(config.DB_ACCESS[location])
-
 def test_connection_to_database():
-    db = connect_to_database(config.DB_LOCATION)
+    db = initialize_database()
     assert(db.initialized == True)
     db.close_connection()
 
+def test_populate_database():
+    try:
+        populate_stocks_table("AAMC", "1Min", 10)
+    except Exception as error:
+        print(error)
+        raise ValueError("Failed to populate database")
+    
+    assert(True)
+
 def test_stocks_table():
-    db = connect_to_database(config.DB_LOCATION)
+    db = initialize_database()
     db.execute("SELECT * from stocks")
     rv = db.cursor.fetchmany(10)
     assert(rv[0] == (1, 'AAMC', 'Altisource Asset Mgmt Corp', 'AMEX', 'us_equity', True, False))
 
 def test_dates_table():
-    db = connect_to_database(config.DB_LOCATION)
+    db = initialize_database()
     db.execute("SELECT * from trading_days")
     rv = db.cursor.fetchmany(10)
     assert(rv[0] == (date(1970, 1, 2), True, time(16, 0), time(9, 30), time(19, 0), time(7, 0)))
@@ -41,7 +39,7 @@ def test_dates_table():
 
 def test_create_table():
     did_pass = []
-    db = connect_to_database(config.DB_LOCATION)
+    db = initialize_database()
     
     sql_cmd =   f"""
                     CREATE TABLE IF NOT EXISTS {TEST_TABLE_NAME} (
@@ -79,7 +77,7 @@ def test_create_table():
 def test_execute_values():
 
 
-    db = connect_to_database(config.DB_LOCATION)
+    db = initialize_database()
 
     sql_cmd =   f"""INSERT INTO {TEST_TABLE_NAME} (col1, col2, col3)
                     VALUES %s
@@ -100,7 +98,7 @@ def test_drop_tables():
     
         did_pass = []
 
-        db = connect_to_database(config.DB_LOCATION)
+        db = initialize_database()
 
         sql_cmd = f"DROP TABLE {TEST_TABLE_NAME}"
         
