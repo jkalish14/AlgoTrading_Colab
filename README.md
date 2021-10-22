@@ -1,7 +1,6 @@
-# Getting Started
+#  Getting Started
 
-
-# Setting up Virtual Environment with Python venv
+## Setting up Virtual Environment with Python venv
 
 Read through the [Python Venv Docs](https://docs.python.org/3/tutorial/venv.html) and setup your virtual environment. I setup mine by creating a .venv directory in my user folder
 ```
@@ -23,13 +22,13 @@ Note, the virtual environment and the files for the project do not need to be in
 virtual env: C:/Users/USER_NAME/.venv/AlgoTrading/
 program files: D:/git/AlgoTrading/
 ```
-# Setting up a Docker Image for local Data Base
+## Setting up a Docker Image for local Data Base
 Take a read through the following: 
 * [TimeScaleDB's Guide](https://docs.timescale.com/timescaledb/latest/how-to-guides/install-timescaledb/self-hosted/docker/installation-docker/#docker) on setting up a database through docker
 * [Tech Expert's Guide](https://techexpert.tips/timescaledb/timescaledb-docker-installation/) to see how to make data persistent
 * [Part Time Larry's YouTube Guide](https://youtu.be/4dwCjaX4QUE?t=604) walks you through installing and testing out the TimescaleDB
 
-# Install dependencies
+## Install dependencies
 
 ## Activate your virtual environment
 first, ensure your virtual environment is active
@@ -57,8 +56,25 @@ $ C:/Users/USER_NAME/.venv/ENV_NAME/Scripts/Activate
 ```
 (ENV_NAME) $ pip install -r requirements.txt
 ```
- 
 
-# Creating the API Keys file
+## Creating the config file
 
 rename the config_template.py file (located in /algotradingcolab/db) to config.py and populate the relevant fields
+
+# Making the project a Pip module
+Following pytest's [Good Integration Practices](https://docs.pytest.org/en/6.2.x/goodpractices.html), algotradingcolab is setup as an editable package. 
+
+First, activate your virtual environment and cd into the project directory (the folder that ./tests/ and this README reside in) and issue the following command
+```bash
+pip install -e .
+```
+
+This creates an editable pip package that automatically incorporates changes that are made to the source code. When this happens, our module 'algotradingcolab' because globally accessible, like pandas and numpy. 
+
+# Running Automated Testing
+Open a terminal from the project's directory and run the following:
+```bash
+pytest
+```
+
+automated test cases for new code sections are required before merging into the main branch

@@ -33,10 +33,10 @@ class DataBase():
 
     def check_if_table_exists(self, table_name : str) -> bool:
         if table_name not in self.tables:
-            error_str = [f"The requested table, {table_name}, does not exist in the Database \nThe Database contains the following tables: \n"]
+            error_str = [f"({__file__}\{__name__}): The requested table, {table_name}, does not exist in the Database \nThe Database contains the following tables: \n"]
             error_str += [f"\t - {key} \n" for key in self.tables]
-            print("".join(error_str))
-            raise KeyError
+            # print("".join(error_str))
+            raise KeyError("".join(error_str))
         
         return True
 
@@ -44,11 +44,11 @@ class DataBase():
         (table_name, header_name) = table_header
         self.check_if_table_exists(table_name)
         if header_name not in self.tables[table_name]:
-            error_str = [f"The requested header, {header_name}, does nto exist in table {table_name}"
+            error_str = [f"({__file__}\{__name__}): The requested header, {header_name}, does nto exist in table {table_name}"
                          f"The table contains the following headers: \n"]
             error_str += [f"\t - {header} \n" for header in self.tables[table_name]]
-            print("".join(error_str))
-            raise KeyError
+            # print("".join(error_str))
+            raise KeyError("".join(error_str))
         
         return True
 

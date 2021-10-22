@@ -1,5 +1,6 @@
 
-DB_LOCATION = "Local" # Or "Remote"
+DB_LOCATION = "Local"
+ALPACA_API_ENV = "paper"
 
 ## Database Settings
 DB_ACCESS = {"Local" : {
@@ -23,11 +24,11 @@ DB_ACCESS = {"Local" : {
 
 
 ## API Settings
-API_SETTINGS = {"Alpaca" : { "Paper" : {"URL" : "https://paper-api.alpaca.markets",
+API_SETTINGS = {"Alpaca" : { "paper" : {"URL" : "https://paper-api.alpaca.markets",
                                         "KEY" : "YOUR PAPER KEY"},
-                             "Live"  : {"URL" : "https://api.alpaca.markets",
+                             "live"  : {"URL" : "https://api.alpaca.markets",
                                         "KEY" : "YOUR LIVE KEY"},
-                             "Secret_Key" : "YOUR PRIVATE KEY"
+                             "secret_key" : "YOUR PRIVATE KEY"
                             }
                 }
 

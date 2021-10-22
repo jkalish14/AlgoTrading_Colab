@@ -1,10 +1,6 @@
-from datetime import date
-import importlib
-from pandas.core.indexes import period
 import talib    
 
 # Stadard Python packages
-import numpy as np
 import pandas as pd
 
 # # Standard plotly imports
@@ -16,12 +12,11 @@ from dash import html
 from dash.dependencies import Input, Output
 
 # Our Libraries
-import config
-from db.database import DataBase
-
+from algotradingcolab.database import DataBase
+from algotradingcolab.database_management import initialize_database, initialize_alpaca_api
 
 ## Initialize the DB
-db = DataBase(config.DB_ACCESS[config.DB_LOCATION])
+db = initialize_database()
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)

@@ -1,23 +1,27 @@
 
 # from context import algotradingcolab
 
-from algotradingcolab.db.database import DataBase
-from algotradingcolab.helpers.decorators import time_func_execution
-from datetime import date, time
+from math import exp
 
-from algotradingcolab.database_management import populate_stocks_table, initialize_database
+from alpaca_trade_api import rest
+from algotradingcolab.database import DataBase
+from algotradingcolab.helpers.decorators import time_func_execution
+import datetime
+
+from algotradingcolab.database_management import *
 
 TEST_TABLE_NAME = "test_cases_123"
 # DATABASE_LOCATIONS = ["Local", "Remote"]
 
 def test_connection_to_database():
     db = initialize_database()
-    assert(db.initialized == True)
     db.close_connection()
+    assert(db.initialized == True)
 
 def test_populate_database():
     try:
-        populate_stocks_table("AAMC", "1Min", 10)
+        db = initialize_database()
+        populate_price_table(db, ["AAMC"], "1Min", 10)
     except Exception as error:
         print(error)
         raise ValueError("Failed to populate database")
@@ -34,7 +38,7 @@ def test_dates_table():
     db = initialize_database()
     db.execute("SELECT * from trading_days")
     rv = db.cursor.fetchmany(10)
-    assert(rv[0] == (date(1970, 1, 2), True, time(16, 0), time(9, 30), time(19, 0), time(7, 0)))
+    assert(rv[0] == (datetime.date(1970, 1, 2), True, datetime.time(16, 0), datetime.time(9, 30), datetime.time(19, 0), datetime.time(7, 0)))
 
 
 def test_create_table():
@@ -96,13 +100,11 @@ def test_execute_values():
 
 def test_drop_tables():
     
-        did_pass = []
+        did_pass = {}
 
         db = initialize_database()
-
-        sql_cmd = f"DROP TABLE {TEST_TABLE_NAME}"
         
-        db.drop_tables(sql_cmd)
+        db.drop_tables(TEST_TABLE_NAME)
 
         # Make sure it was removed from the table
         sql_cmd =   f"""
@@ -114,13 +116,33 @@ def test_drop_tables():
                     """
         db.execute(sql_cmd)
         rv = db.cursor.fetchone()
-        did_pass.append(rv == (False,))
+        did_pass["Check table gone SQL"] = (rv == (False,))
 
         # Make sure the DataBase object was updated
         try:
             db.check_if_table_exists(TEST_TABLE_NAME)
-        except KeyError:
-            did_pass.append(True)
+        except KeyError as error:
+            print(error)
+            did_pass["Check Table gone DataBase Class"] = True
         
-        assert(all(did_pass) == True)
+        assert all(did_pass.values()) == True,  "".join(["Failed Test, see below: \n"] + [f"\t-{key} : {value}\n" for (key,value) in did_pass.items()])
+
+
+def test_tables_exists():
+    
+    expected_tables = ["stocks", "trading_days", "quotes_minutes", "price_minute"]
+    db = initialize_database()
+
+    db_table_names = [*db.tables]
+    
+    did_pass = []
+    results = []
+
+    for table in expected_tables:
+
+        in_table = True if table in db_table_names else False
+        did_pass.append(in_table)
+        results.append((in_table, table))
+    
+    assert all(did_pass), "".join(["Failed test, see result pairs \n"] + [f"\t - {pair}\n" for pair in results])
     
