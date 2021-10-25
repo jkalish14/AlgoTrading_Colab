@@ -1,3 +1,4 @@
+from datetime import date
 import talib    
 
 # Stadard Python packages
@@ -27,8 +28,8 @@ rv = db.cursor.fetchall()
 
 ticker_dict  = { entry[2] : entry for entry in rv}
 ticker_dropdown_options = [{"label": ticker, "value" : ticker} for ticker in list(ticker_dict)]
-allowable_time_frames = ["1Min"]
-time_frame_dropdown_options = [{"label": time_frame, "value" : time_frame} for time_frame in allowable_time_frames]
+time_frame_table = {"1Min" : "price_minute", "1D" : "price_day"}
+time_frame_dropdown_options = [{"label": time_frame, "value" : time_frame} for time_frame in time_frame_table]
 technical_periods_dropdown_options = [{"label" : i, "value" : i} for i in range(5,500)]
 
 
@@ -160,7 +161,7 @@ def update_plot(ticker : str,
                 ):
 
     if ticker is None: ticker = "AAPL"
-    if time_frame is None : time_frame = "1Day"
+    if time_frame is None : time_frame = "1D"
     if periods is None: periods = 200
     if not sma_periods: sma_periods = [100]
     if not ema_periods: ema_periods = [20]
@@ -168,12 +169,12 @@ def update_plot(ticker : str,
     if not macd_periods or len(macd_periods) < 2: macd_periods = [20, 12]
     if macd_signal_period is None : macd_signal_period = 9
 
-    max_ta_periods = max(sma_periods + ema_periods + [periods, bb_band_periods, macd_signal_period] + macd_periods)
+    max_ta_periods = max(sma_periods + ema_periods + [bb_band_periods, macd_signal_period] + macd_periods)
 
 
     # Get requested num of points
     sql_cmd =   f"""
-                    SELECT * FROM price_minute 
+                    SELECT * FROM {time_frame_table[time_frame]} 
                     WHERE stock_id = {ticker_dict[ticker][0]}
                     ORDER BY date_time DESC
                     LIMIT {periods + max_ta_periods }
@@ -184,12 +185,12 @@ def update_plot(ticker : str,
     data = { pd.Timestamp(p[1]) : {"o" : p[2], "h" : p[3], "l" : p[4], "c" : p[5], "v" : p[6]} for p in rv}
     df = pd.DataFrame(data.values(), data.keys())
     df.sort_index(inplace = True)
-    
+
     # # Create the plot with all of the traces
     fig = make_subplots(rows=4, row_heights=[0.2, 0.6, 0.2, 0.2],  vertical_spacing=0, horizontal_spacing=0,  shared_xaxes=True)
 
     # Add to the top subplot
-    dates = df.index
+    dates = df.index.strftime("%Y/%m/%d %H:%M:%S")
     rsi = talib.RSI(df.c)
     fig.add_traces(data=[go.Scatter(x=dates, y=rsi, name="RSI", line_width=0.7, showlegend=False),
                             go.Scatter(x=dates, y= [70]*len(dates), line=dict(color='black', width=0.5), showlegend=False, hoverinfo='skip'),
@@ -233,11 +234,13 @@ def update_plot(ticker : str,
         plot_bgcolor='rgba(250,250,250,1)',
         paper_bgcolor='rgba(250,250,250,1)',
         hovermode='x unified',
-        legend=dict(orientation="h", xanchor="center", y=1.1, x=0.5),
+        legend=dict(orientation="h", xanchor="center", y=1.1, x=0.5)
     )   
 
-
-    fig.update_xaxes(rangeslider_visible=False, visible=True, range = (dates[max_ta_periods], dates[-1]))
+    print(max_ta_periods)
+    print(dates[max_ta_periods])
+    print(dates[-1])
+    fig.update_xaxes(rangeslider_visible=False, visible=True, range = (max_ta_periods, len(dates)))
     fig.update_yaxes(row=1, col=1, title="RSI", tickvals = [30, 50, 70])
     fig.update_yaxes(row=2, col=1, title="Share Price")
     fig.update_yaxes(row=3, col=1, title="Volume")
