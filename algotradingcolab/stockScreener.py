@@ -1,4 +1,5 @@
 from datetime import date
+from os import terminal_size
 import talib    
 
 # Stadard Python packages
@@ -13,8 +14,7 @@ from dash import html
 from dash.dependencies import Input, Output
 
 # Our Libraries
-from algotradingcolab.database import DataBase
-from algotradingcolab.database_management import initialize_database, initialize_alpaca_api
+from algotradingcolab.database_management import initialize_database, populate_price_table
 
 ## Initialize the DB
 db = initialize_database()
@@ -23,7 +23,11 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Create the dropdown lists
-db.execute("SELECT id, name, symbol from stocks")
+sql_cmd =   '''
+            SELECT id, name, symbol FROM stocks
+            ORDER BY symbol ASC
+            '''
+db.execute(sql_cmd)
 rv = db.cursor.fetchall()
 
 ticker_dict  = { entry[2] : entry for entry in rv}
@@ -171,6 +175,8 @@ def update_plot(ticker : str,
 
     max_ta_periods = max(sma_periods + ema_periods + [bb_band_periods, macd_signal_period] + macd_periods)
 
+    # Get the most recent data from the API and write it to the DB
+    populate_price_table(db, ticker, time_frame, periods + max_ta_periods)
 
     # Get requested num of points
     sql_cmd =   f"""
@@ -237,9 +243,6 @@ def update_plot(ticker : str,
         legend=dict(orientation="h", xanchor="center", y=1.1, x=0.5)
     )   
 
-    print(max_ta_periods)
-    print(dates[max_ta_periods])
-    print(dates[-1])
     fig.update_xaxes(rangeslider_visible=False, visible=True, range = (max_ta_periods, len(dates)))
     fig.update_yaxes(row=1, col=1, title="RSI", tickvals = [30, 50, 70])
     fig.update_yaxes(row=2, col=1, title="Share Price")

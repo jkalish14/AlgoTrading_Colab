@@ -81,7 +81,6 @@ def populate_price_table(db         : DataBase,
                 print(error)
                 pass
 
-            request_time = timer()
             full_rv += rv[symbol]
         
             time.sleep(0.25)  # 0.3 = 200 Querys / 60 Seconds (Alapca API Limit)
@@ -298,6 +297,6 @@ if __name__ == "__main__":
     # create_tables(db)
     # stock_names = [*get_all_stock_symbols(db)]
     
-    stock_names = ['AAPL','TSLA','GE']
-    populate_price_table(db, stock_names, "1Min", 10000)
+    stock_names = ['AAPL','TSLA','GE', 'MSFT', 'SQ']
+    populate_price_table(db, stock_names, "1Min", 5000)
     # print("end")
