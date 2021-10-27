@@ -3,11 +3,8 @@ from typing import Union
 import alpaca_trade_api as tradeapi
 import pandas as pd
 
-from timeit import default_timer as timer
 import time
 import math
-
-from psycopg2.extras import execute_batch
 
 from algotradingcolab import config
 from algotradingcolab.database import DataBase
